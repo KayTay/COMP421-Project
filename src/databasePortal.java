@@ -17,6 +17,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -24,6 +26,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Separator;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -32,6 +37,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
  
@@ -44,103 +52,72 @@ public class databasePortal extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("");
        
-        BorderPane root = new BorderPane();
-           
-        root.setLeft(createMenu(root));       
-        root.setCenter(createSignUpForm());
-      	 
+        BorderPane root = new BorderPane();    
+        root.setCenter(clientWindow());
+ 
         primaryStage.setScene(new Scene(root, 700, 500));
         primaryStage.show();
+    	
     }
 
-    public VBox createMenu(BorderPane root) {
+    public TabPane clientWindow() {
+    	
+    	 TabPane tabPane = new TabPane();
+    	 tabPane.setSide(Side.LEFT);
+    	 tabPane.setRotateGraphic(true);  
     	 
-    	 VBox vbox = new VBox(); 
+    	 
+    	 //add product 
+    	 Tab addProduct = new Tab("Add Product"); 
+    	 addProduct.setClosable(false);
+    	 //addProduct.setContent(addProductContent()); 
+    	 tabPane.getTabs().add(addProduct); 
+    	 
+    	 
+    	 //Pay 
+    	 Tab pay = new Tab("Check Out");
+    	 pay.setClosable(false);
+    	 tabPane.getTabs().add(pay); 
+    	 
+    	 //look up coupon
+    	 Tab coupon = new Tab("Find Coupons");    	 
+    	 coupon.setClosable(false);  
+    	 coupon.setContent(couponContent()); 
+    	 tabPane.getTabs().add(coupon); 
          
-         Button btn0 = new Button("Sign up");
-         btn0.setMaxWidth(Double.MAX_VALUE);
-         btn0.setOnAction(new EventHandler<ActionEvent>() {
-             @Override
-             public void handle(ActionEvent event) {
-                root.setCenter(createSignUpForm());
-             }
-         });
-                      
-         Button btn1 = new Button("Add product to your order");
-         btn1.setMaxWidth(Double.MAX_VALUE);
-         btn1.setOnAction(new EventHandler<ActionEvent>() {
-             @Override
-             public void handle(ActionEvent event) {
-            	 Text text = new Text("add product");
-                 root.setCenter(text);
-             }
-         });
+    	 //regular order
+    	 Tab regularOrder = new Tab(); 
+    	 regularOrder.setClosable(false);
+    	 tabPane.getTabs().add(regularOrder); 
          
+        
          
-         Button btn2 = new Button("Pay for your order");
-         btn2.setMaxWidth(Double.MAX_VALUE);
-         btn2.setOnAction(new EventHandler<ActionEvent>() {
-             @Override
-             public void handle(ActionEvent event) {
-            	 Text text = new Text("pay");
-                 root.setCenter(text);
-             }
-         });
+         Tab rate = new Tab(); 
+         VBox vbox = new VBox(); 
+    	 vbox.setPadding(new Insets(30, 20, 10, 20)); 
+    	 pay.setClosable(false);
+    	 tabPane.getTabs().add(pay); 
+    	 
+    	 HBox one = new HBox(); 
+    	 one.setSpacing(5); 
+    	 Label label = new Label("Delivery Man Name:");
+    	 TextField textField2 = new TextField("");
+    	 textField2.setPrefWidth(200);
+    	 one.getChildren().addAll(label, textField2); 
+  
+    	 HBox two = new HBox(); 
+    	 Button btn1 = new Button();
+    	 Button btn2 = new Button();
+//    	 Image emptystar = new Image(getClass().getResourceAsStream("./emptyStar.png")); 
+//    	 btn1.setbac
+//    	 Image star = new Image(getClass().getResourceAsStream("./star.png")); 
+//    	btn1.setGraphic(new ImageView(emptystar));
+//    		 btn2.setGraphic(new ImageView(star));
+         rate.setContent(vbox);
          
-         
-         Button btn3 = new Button("Look up coupons");
-         btn3.setMaxWidth(Double.MAX_VALUE);
-         btn3.setOnAction(new EventHandler<ActionEvent>() {
-             @Override
-             public void handle(ActionEvent event) {
-            	 HBox hbox = new HBox(); 
-            	 hbox.setSpacing(5);
-            	 hbox.setPadding(new Insets(30, 20, 10, 20)); 
-            	 TextField TextField = new TextField("Enter product name...");
-            	 TextField.setPrefWidth(200);
-            	 Button btn = new Button("Search");
-            	 hbox.getChildren().addAll(TextField, btn); 
-                 root.setCenter(hbox);
-             }
-         });
-         
-         Button btn4 = new Button("Create a regular order");
-         btn4.setMaxWidth(Double.MAX_VALUE);
-         
-         Button btn5 = new Button("Rate your delivery man");
-         btn5.setMaxWidth(Double.MAX_VALUE);
-         btn5.setOnAction(new EventHandler<ActionEvent>() {
-             @Override
-             public void handle(ActionEvent event) {
-            	 VBox vbox = new VBox(); 
-            	 vbox.setPadding(new Insets(30, 20, 10, 20));  
-            	 
-            	 HBox one = new HBox(); 
-            	 one.setSpacing(5); 
-            	 Label label = new Label("Delivery Man Name:");
-            	 TextField textField = new TextField("");
-            	 textField.setPrefWidth(200);
-            	 one.getChildren().addAll(label, textField); 
-          
-            	 HBox two = new HBox(); 
-            	 Button btn1 = new Button();
-            	 Button btn2 = new Button();
-            	 Image emptystar = new Image(getClass().getResourceAsStream("./emptyStar.png")); 
-            	 btn1.setbac
-            	 Image star = new Image(getClass().getResourceAsStream("./star.png")); 
-            	btn1.setGraphic(new ImageView(emptystar));
-            		 btn2.setGraphic(new ImageView(star));
-            	 
-            	 
-            	
-            	 two.getChildren().addAll(btn1,btn2); 
-            	// Button btn = new Button("Submit");
-            	 
-            	 vbox.getChildren().addAll(one, two ); 
-                 root.setCenter(vbox);
-             }
-         });
-            
+        Tab logout = new Tab(); 
+       
+ 
          Button btn6 = new Button("Quit");
          btn6.setMaxWidth(Double.MAX_VALUE);
          btn6.setOnAction(new EventHandler<ActionEvent>() {
@@ -150,63 +127,148 @@ public class databasePortal extends Application {
              }
          });
          
-         vbox.setSpacing(0);
-         vbox.setPadding(new Insets(0, 20, 10, 0)); 
-         vbox.getChildren().addAll(btn0,btn1,btn2,btn3,btn4,btn5,btn6); 
-         return vbox;       
+//         vbox.setSpacing(0);
+//         vbox.setPadding(new Insets(0, 20, 10, 0)); 
+//         vbox.getChildren().addAll(btn1,btn2,btn3,btn4,btn5,btn6); 
+//         return vbox;   
+         
+         return tabPane; 
     }
     
-    public GridPane createSignUpForm(){
+    public void addProductContent() {
+    	
+    }
+    
+    public HBox couponContent() {
+    	HBox hbox = new HBox(); 
+   	 	hbox.setAlignment(Pos.TOP_CENTER);
+   	 	hbox.setSpacing(5);
+   	 	hbox.setPadding(new Insets(30, 20, 10, 20)); 
+   	 	TextField textField = new TextField();
+   	 	textField.setPromptText("Enter product name...");
+   	 
+   	 	textField.setPrefWidth(200);
+   	 	Button btn = new Button("Search");
+   	 	btn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                queryCoupons(textField.getText()); 
+            }
+        });
+   	 	hbox.getChildren().addAll(textField, btn);
+   	 	return hbox; 
+    }
+    
+    public void queryCoupons(String name) {
+    	//TODO query database for coupons 
+    	//format output to window 
+    }
+    
+  
+    public GridPane LoginWindow(){
 	
 		GridPane grid = new GridPane();
 		grid.setAlignment(Pos.CENTER);
 		grid.setHgap(10);
 		grid.setVgap(10);
-				
-		Text scenetitle = new Text("Sign Up Below");
-		grid.add(scenetitle, 0, 0, 2, 1);
-	
+			
+		Text login = new Text(" Log In");
+		login.setFont(Font.font ("Verdana", 20));
+		grid.add(login, 1,0 );
+		
 		//name
-		Label name = new Label("Name:");
-		grid.add(name, 0, 1);
-		TextField nameTextField = new TextField();
-		grid.add(nameTextField, 1, 1);
+		Label email = new Label("Email:");
+		grid.add(email, 0, 1);
+		TextField emailTextField = new TextField();
+		grid.add(emailTextField, 1, 1);
 	
 		//password
 		Label pw = new Label("Password:");
 		grid.add(pw, 0, 2);
 		PasswordField pwBox = new PasswordField();
 		grid.add(pwBox, 1, 2);
+		
+		Button loginbtn = new Button("Log In");
+		loginbtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+            	verifyLogin(email.getText(), pw.getText()); 
+            }
+        });
+		HBox hbBtn = new HBox(10);
+		hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
+		hbBtn.getChildren().add(loginbtn);
+		grid.add(hbBtn, 1, 3);
+		
+		Separator separator = new Separator();
+		grid.add(separator, 0,4,3,1); 
+		
+		Text signup = new Text("  No account?\nSign Up Below");
+		signup.setFont(Font.font ("Verdana", 20));
+		grid.add(signup, 1, 5);
+	
+		//name
+		Label name = new Label("Name:");
+		grid.add(name, 0, 6);
+		TextField nameTextField = new TextField();
+		grid.add(nameTextField, 1, 6);
+	
+		//email 
+		Label email2 = new Label("Email :");
+		grid.add(email2, 0, 7);
+		TextField emailTextField2 = new TextField();
+		grid.add(emailTextField2, 1, 7);
+		
+		//password
+		Label pw2 = new Label("Password:");
+		grid.add(pw2, 0, 8);
+		PasswordField pwBox2 = new PasswordField();
+		grid.add(pwBox2, 1, 8);
 		    
 	    //address
 	    Label address = new Label("Address:");
-		grid.add(address, 0, 3);
+		grid.add(address, 0, 9);
 		TextField addressTextField = new TextField();
-		grid.add(addressTextField, 1, 3);
+		grid.add(addressTextField, 1, 9);
 		
 	    //phone
 		Label phone = new Label("Phone:");
-		grid.add(phone, 0, 4);
+		grid.add(phone, 0, 10);
 		TextField phoneTextField = new TextField();
-		grid.add(phoneTextField, 1, 4);
+		grid.add(phoneTextField, 1, 10);
 	    
-		//email 
-		Label email = new Label("Email :");
-		grid.add(email, 0, 5);
-		TextField emailTextField = new TextField();
-		grid.add(emailTextField, 1, 5);
-		
-		Button btn = new Button("Sign up");
-		HBox hbBtn = new HBox(10);
-		hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
-		hbBtn.getChildren().add(btn);
-		grid.add(hbBtn, 1, 7);
-		
-		//get and verify text 
-		
+		Button signUpbtn = new Button("Sign up");
+		signUpbtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+            	verifySignUp(name.getText(), email2.getText(), pw2.getText(), address.getText(), phone.getText()); 
+            }
+        });
+		HBox hbBtn2 = new HBox(10);
+		hbBtn2.setAlignment(Pos.BOTTOM_RIGHT);
+		hbBtn2.getChildren().add(signUpbtn);
+		grid.add(hbBtn2, 1, 11);
+	
 		return grid; 
-	}
-
+    }
+    
+    public void verifyLogin(String email, String password)
+    {
+    	//TODO
+    	//verify that strings are correct 
+    	//add to database 
+    	//on success jump to client window 
+    }
+    
+    
+    public void verifySignUp(String name, String email, String password, String address, String phone)
+    {
+    	//TODO
+    	//verify that strings are correct 
+    	//add to database 
+     	//on success jump to client window 
+    	
+    }
 }
 	
 
@@ -217,4 +279,4 @@ public class databasePortal extends Application {
 //look up coupons for a product 
 //create a regular order 
 //rate a delivery man 
-// quit 
+//quit 
