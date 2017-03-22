@@ -9,6 +9,7 @@ import com.sun.javafx.jmx.MXNodeAlgorithmContext;
 import com.sun.javafx.sg.prism.NGNode;
 
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -26,6 +27,7 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -39,6 +41,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import java.sql.* ;
 import java.sql.DriverManager;
 import java.sql.Connection;
@@ -46,7 +49,8 @@ import java.sql.SQLException;
 
 
 public class databasePortal extends Application {
-    static Connection con; 
+    static Connection con;
+    BorderPane root; 
 	
 	public static void main(String[] args) {	
     	//establish database connection
@@ -65,7 +69,7 @@ public class databasePortal extends Application {
 			System.out.println("Class not found");
 		}
 
-		// This is the url you must use for Postgresql.
+		//This is the url you must use for Postgresql.
 		//Note: This url may not valid now !
 		String url = "jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421";
 		String usernamestring = "cs421g26";
@@ -77,6 +81,7 @@ public class databasePortal extends Application {
 			System.out.println("Successful Connection");
 		}
 		catch (SQLException e) {
+			e.printStackTrace();
 			System.out.println("Failed Connection");
 			int sqlCode = e.getErrorCode(); // Get SQLCODE
 			String sqlState = e.getSQLState(); // Get SQLSTATE 
@@ -89,12 +94,11 @@ public class databasePortal extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("");
        
-        BorderPane root = new BorderPane();    
-        root.setCenter(loginWindow());
+        root = new BorderPane();    
+        root.setCenter(clientWindow());
  
-        primaryStage.setScene(new Scene(root, 700, 500));
-        primaryStage.show();
-    	
+        primaryStage.setScene(new Scene(root, 800, 500));
+        primaryStage.show();	
     }
 
     public TabPane clientWindow() {
@@ -102,19 +106,18 @@ public class databasePortal extends Application {
     	 TabPane tabPane = new TabPane();
     	 tabPane.setSide(Side.LEFT);
     	 tabPane.setRotateGraphic(true);  
-    	 
-    	 
+    	  	 
     	 //add product 
     	 Tab addProduct = new Tab("Add Product"); 
     	 addProduct.setClosable(false);
-    	 //addProduct.setContent(addProductContent()); 
+    	 addProduct.setContent(addProductContent()); 
     	 tabPane.getTabs().add(addProduct); 
-    	 
-    	 
-    	 //Pay 
-    	 Tab pay = new Tab("Check Out");
-    	 pay.setClosable(false);
-    	 tabPane.getTabs().add(pay); 
+    	 	 
+    	 //check out 
+    	 Tab checkOut = new Tab("Check Out");
+    	 checkOut.setClosable(false);
+    	 checkOut.setContent(checkOutContent()); 
+    	 tabPane.getTabs().add(checkOut); 
     	 
     	 //look up coupon
     	 Tab coupon = new Tab("Find Coupons");    	 
@@ -122,61 +125,22 @@ public class databasePortal extends Application {
     	 coupon.setContent(couponContent()); 
     	 tabPane.getTabs().add(coupon); 
          
-    	 //regular order
-    	 Tab regularOrder = new Tab(); 
-    	 regularOrder.setClosable(false);
-    	 tabPane.getTabs().add(regularOrder); 
+    	 //rate your delivery man 
+         Tab rate = new Tab("Rate Delivery Man"); 
+    	 rate.setClosable(false);
+    	 rate.setContent(rateContent());
+    	 tabPane.getTabs().add(rate); 
          
-        
-         
-         Tab rate = new Tab(); 
-         VBox vbox = new VBox(); 
-    	 vbox.setPadding(new Insets(30, 20, 10, 20)); 
-    	 pay.setClosable(false);
-    	 tabPane.getTabs().add(pay); 
+    	 //logout
+    	 Tab logout = new Tab("Logout"); 
+    	 tabPane.getTabs().add(logout); 
+    	 logout.setClosable(false);
     	 
-    	 HBox one = new HBox(); 
-    	 one.setSpacing(5); 
-    	 Label label = new Label("Delivery Man Name:");
-    	 TextField textField2 = new TextField("");
-    	 textField2.setPrefWidth(200);
-    	 one.getChildren().addAll(label, textField2); 
   
-    	 HBox two = new HBox(); 
-    	 Button btn1 = new Button();
-    	 Button btn2 = new Button();
-//    	 Image emptystar = new Image(getClass().getResourceAsStream("./emptyStar.png")); 
-//    	 btn1.setbac
-//    	 Image star = new Image(getClass().getResourceAsStream("./star.png")); 
-//    	btn1.setGraphic(new ImageView(emptystar));
-//    		 btn2.setGraphic(new ImageView(star));
-         rate.setContent(vbox);
-         
-        Tab logout = new Tab(); 
-       
- 
-         Button btn6 = new Button("Quit");
-         btn6.setMaxWidth(Double.MAX_VALUE);
-         btn6.setOnAction(new EventHandler<ActionEvent>() {
-             @Override
-             public void handle(ActionEvent event) {
-                 System.exit(0);
-             }
-         });
-         
-//         vbox.setSpacing(0);
-//         vbox.setPadding(new Insets(0, 20, 10, 0)); 
-//         vbox.getChildren().addAll(btn1,btn2,btn3,btn4,btn5,btn6); 
-//         return vbox;   
-         
          return tabPane; 
     }
     
-    public void addProductContent() {
-    	
-    }
-    
-    public HBox couponContent() {
+    public HBox addProductContent() {
     	HBox hbox = new HBox(); 
    	 	hbox.setAlignment(Pos.TOP_CENTER);
    	 	hbox.setSpacing(5);
@@ -196,12 +160,123 @@ public class databasePortal extends Application {
    	 	return hbox; 
     }
     
-    public void queryCoupons(String name) {
-    	//TODO query database for coupons 
+    //TODO
+    public void queryProducts(String name) {
+    	//TODO query database for products where name is the product name  
     	//format output to window 
     }
     
+    //TODO
+    public HBox checkOutContent() {
+    	HBox h = new HBox(); 
+    	return h; 
+    }
+    
+    public HBox couponContent() {
+    	HBox hbox = new HBox(); 
+   	 	hbox.setAlignment(Pos.TOP_CENTER);
+   	 	hbox.setSpacing(5);
+   	 	hbox.setPadding(new Insets(70, 20, 10, 20)); 
+   	 	TextField textField = new TextField();
+   	 	textField.setPromptText("Enter product name...");
+   	 
+   	 	textField.setPrefWidth(200);
+   	 	Button btn = new Button("Search");
+   	 	btn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                String s = textField.getText(); 
+            	if(!s.isEmpty())
+            	{
+            		queryCoupons(s);
+            	}
+            }
+        });
+   	 	hbox.getChildren().addAll(textField, btn);
+   	 	return hbox; 
+    }
+    
+    //TODO
+    public void queryCoupons(String name) {
+    	//TODO query database for coupons where name is the product name  
+    	//format output to window 
+    }
   
+    public VBox rateContent() {    
+    	VBox v = new VBox(); 
+    	v.setAlignment(Pos.TOP_CENTER);
+    	v.setSpacing(5); 	
+    	v.setPadding(new Insets(70, 20, 10, 20)); 
+    	
+    	
+    	HBox h = new HBox(); 
+		h.setAlignment(Pos.TOP_CENTER);
+   	 	h.setSpacing(5); 	 
+    	Label label = new Label("Delivery Man Name:");
+    	TextField textField = new TextField("");
+    	textField.setPrefWidth(200);
+    	h.getChildren().addAll(label, textField); 
+ 
+    	
+    	Image emptystar = new Image(getClass().getResourceAsStream("./emptyStar.png")); 
+    	Image star = new Image(getClass().getResourceAsStream("./star.png")); 
+    	HBox h2 = new HBox(); 
+    	h2.setAlignment(Pos.CENTER);
+    	for(int i = 0; i<5; i++)
+    	{
+	    	ToggleButton btn1 = new ToggleButton();
+	    	btn1.setGraphic(new ImageView(emptystar));
+	    	btn1.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent event) {	 
+	            	if(!btn1.isSelected())
+	            	{
+	            		btn1.setGraphic(new ImageView(emptystar));  
+	            	}
+	            	else 
+	            	{
+	            		btn1.setGraphic(new ImageView(star));  
+	            	}
+	            }
+	        });
+	    	h2.getChildren().addAll(btn1);
+    	}
+    	
+    	Button submit = new Button("Submit"); 
+    	submit.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {	
+  
+            	int selected = 0; 
+            	ObservableList<Node> nodes = h2.getChildren(); 
+            	for( Node n : nodes)
+            	{
+            		if(((ToggleButton)n).isSelected())
+            		{
+            			selected++; 
+            		}
+            	}
+            	
+            	String s = textField.getText(); 
+            	
+            	if(selected > 0 && !s.isEmpty())
+            	{
+            		insertRating(s, selected); 
+            	}
+            }
+        });
+    	
+    	v.getChildren().addAll(h,h2,submit); 
+         
+    	 return v; 
+    }
+   
+    //TODO
+    public void insertRating(String name, int rating)
+    {
+    	//given the delivery man's name update their rating 
+    }
+    
     public GridPane loginWindow(){
 	
 		GridPane grid = new GridPane();
@@ -233,7 +308,8 @@ public class databasePortal extends Application {
             	if(success == false)
             	{
             		 Text error = new Text("Invalid Email or Password!"); 
-            		 grid.add(error,0,4,1,2);
+            		 error.setFill(Color.RED); 
+            		 grid.add(error,1,4,1,2);
             	}
             }
         });
@@ -243,17 +319,11 @@ public class databasePortal extends Application {
 		grid.add(hbBtn, 1, 3);
 		
 		Separator separator = new Separator();
-		grid.add(separator, 0,5,3,1); 
+		grid.add(separator, 0,6,3,1); 
 		
 		Text signup = new Text("  No account?\nSign Up Below");
 		signup.setFont(Font.font ("Verdana", 20));
-		grid.add(signup, 1, 6);
-	
-		//name
-		Label name = new Label("Name:");
-		grid.add(name, 0, 7);
-		TextField nameTextField = new TextField();
-		grid.add(nameTextField, 1, 7);
+		grid.add(signup, 1, 7);
 	
 		//email 
 		Label email2 = new Label("Email :");
@@ -283,74 +353,68 @@ public class databasePortal extends Application {
 		signUpbtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-            	verifySignUp(name.getText(), email2.getText(), pw2.getText(), address.getText(), phone.getText()); 
+            	boolean success =  verifySignUp(email2.getText(), pw2.getText(), address.getText(), phone.getText()); 
+            	if(success == false)
+            	{
+            		 Text error = new Text("Invalid input, try again!"); 
+            		 error.setFill(Color.RED); 
+            		 grid.add(error,1,13,1,2);
+            	}
             }
         });
 		HBox hbBtn2 = new HBox(10);
 		hbBtn2.setAlignment(Pos.BOTTOM_RIGHT);
 		hbBtn2.getChildren().add(signUpbtn);
-		grid.add(hbBtn2, 1, 11);
+		grid.add(hbBtn2, 1, 12);
 	
 		return grid; 
     }
     
+    //TODO (Kathryn) 
     public boolean verifyLogin(String email, String password)
     {
-    	//verify that strings are correct v
+    	//verify that strings are correct values 
     	if(email.length() > 50 || ! email.contains("@"))
     	{
     		return false; 
-    	}
-    	
+    	} 	
     	if(password.length() > 20)
     	{
     		return false; 
     	}
     	
-    	return false; 
-    	
     	//query database for user 
-//    	String query = "SELECT * FROM users WHERE email ="+email+";";
-//    	Statement stmt = null; 
-//		try {
-//			stmt = con.createStatement();
-//	        ResultSet rs = stmt.executeQuery(query);
-//	        while (rs.next()) {
-//	           String
-//	        	
-//	        	String coffeeName = rs.getString("COF_NAME");
-//	            int supplierID = rs.getInt("SUP_ID");
-//	            float price = rs.getFloat("PRICE");
-//	            int sales = rs.getInt("SALES");
-//	            int total = rs.getInt("TOTAL");
-//	            System.out.println(coffeeName + "\t" + supplierID +
-//	                               "\t" + price + "\t" + sales +
-//	                               "\t" + total);
-//	        }
-//		 } 
-//		 catch (SQLException e ) {} 
-//		 finally{
-//		     if (stmt != null) { stmt.close(); }
-//		 }
+    	String query = "SELECT * FROM users WHERE email ="+email+";";
+    	Statement stmt = null; 
+		try {
+			stmt = con.createStatement();
+	        ResultSet rs = stmt.executeQuery(query);
+	        while (rs.next()) {
+	           String pas = rs.getString("password"); 
+	           if(password.equals(pas))
+	           {
+	        	   root.setCenter(clientWindow());
+	        	   root.setPrefSize(700, 700);
+	           }
+	        }
+		} 
+		catch (SQLException e ) {} 
+		 
+		try {
+			stmt.close();
+		} catch (SQLException e) {}
+		
+		return true; 
     }
     
-    
-    public void verifySignUp(String name, String email, String password, String address, String phone)
+    //TODO (Amanda) 
+    public boolean verifySignUp(String email, String password, String address, String phone)
     {
     	//TODO
     	//verify that strings are correct 
     	//add to database 
      	//on success jump to client window 
-    	
+    	return true; 
     }
 }
 	
-
-//sign up 
-//add product to order 
-//pay for order 
-	// include redeeming points and coupons 
-//look up coupons for a product 
-//create a regular order 
-//rate a delivery man 
-//quit 
