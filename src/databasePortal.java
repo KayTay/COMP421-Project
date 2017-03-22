@@ -1,7 +1,3 @@
-
-
-
-
 import java.io.File;
 
 import javax.imageio.ImageIO;
@@ -42,11 +38,87 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
- 
+import java.sql.* ;
+import java.sql.DriverManager;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+
 public class databasePortal extends Application {
     public static void main(String[] args) {
-        launch(args);
-    }
+		launch(args);
+
+		// Register the driver.  You must register the driver before you can use it.
+		try {
+			DriverManager.registerDriver(new org.postgresql.Driver());
+			System.out.println("Successful Driver registration");
+		}
+		catch (Exception cnfe) {
+			System.out.println("Class not found");
+		}
+
+
+		//// This is the url you must use for Postgresql.
+////Note: This url may not valid now !
+		String url = "jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421";
+		String usernamestring = "cs421g26";
+		String passwordstring = "Joseph@421";
+
+		try {
+			Connection con = DriverManager.getConnection(url, usernamestring, passwordstring);
+			Statement statement = con.createStatement();
+
+			System.out.println("Successful Connection");
+
+			// insert into DB
+			String querySQL = "INSERT INTO users VALUES ('amanda.ivey@mail.mcgill.fr', 'password', 1234567890, '475 Ave Des Pins')";
+//			String querySQL = "SELECT * From users"; //INSERT INTO users VALUES ('amanda.ivey@mail.mcgill.ca', 'password', 1234567890, '475 Ave Des Pins')";
+			System.out.println (querySQL) ;
+			java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
+			while ( rs.next ( ) ) {
+				String email = rs.getString ( 1 ) ;
+				int phoneNum = rs.getInt (3);
+				System.out.println ("email:  " + email);
+				System.out.println ("name:  " + phoneNum);
+			}
+			System.out.println ("DONE");
+
+
+		}
+		catch (SQLException e) {
+			System.out.println("Failed Connection");
+			int sqlCode = e.getErrorCode(); // Get SQLCODE
+			String sqlState = e.getSQLState(); // Get SQLSTATE
+
+			// Your code to handle errors comes here;
+			// something more meaningful than a print would be good
+			System.out.println("Code: "  + sqlCode + "  sqlState: " + sqlState);
+		}
+
+		// Insert a new tuple
+//	try {
+//	    String querySQL = "INSERT INTO users VALUES ('amanda.ivey@mail.mcgill.ca', 'password', 1234567890, '475 Ave Des Pins')";
+//	    System.out.println (querySQL) ;
+//	    java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
+//	    while ( rs.next ( ) ) {
+//		String email = rs.getString ( 1 ) ;
+//		int phoneNum = rs.getInt (3);
+//		System.out.println ("email:  " + email);
+//		System.out.println ("name:  " + phoneNum);
+//	    }
+//	    System.out.println ("DONE");
+//	} catch (SQLException e)
+//	    {
+////		sqlCode = e.getErrorCode(); // Get SQLCODE
+////		sqlState = e.getSQLState(); // Get SQLSTATE
+////
+////		// Your code to handle errors comes here;
+////		// something more meaningful than a print would be good
+////		System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
+//	    }
+//
+
+	}
     
     @Override
     public void start(Stage primaryStage) {
