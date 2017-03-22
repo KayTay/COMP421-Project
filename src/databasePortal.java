@@ -37,6 +37,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.sql.* ;
 import java.sql.DriverManager;
@@ -45,10 +46,17 @@ import java.sql.SQLException;
 
 
 public class databasePortal extends Application {
-    public static void main(String[] args) {
-		launch(args);
-
-		// Register the driver.  You must register the driver before you can use it.
+    static Connection con; 
+	
+	public static void main(String[] args) {	
+    	//establish database connection
+    	con = connect(); 
+    	//launch GUI 
+    	launch(args);
+	}
+    
+    public static Connection connect(){
+    	// Register the driver. You must register the driver before you can use it.
 		try {
 			DriverManager.registerDriver(new org.postgresql.Driver());
 			System.out.println("Successful Driver registration");
@@ -57,75 +65,32 @@ public class databasePortal extends Application {
 			System.out.println("Class not found");
 		}
 
-
-		//// This is the url you must use for Postgresql.
-////Note: This url may not valid now !
+		// This is the url you must use for Postgresql.
+		//Note: This url may not valid now !
 		String url = "jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421";
 		String usernamestring = "cs421g26";
 		String passwordstring = "Joseph@421";
 
+		Connection con = null;
 		try {
-			Connection con = DriverManager.getConnection(url, usernamestring, passwordstring);
-			Statement statement = con.createStatement();
-
+			con = DriverManager.getConnection(url, usernamestring, passwordstring);
 			System.out.println("Successful Connection");
-
-			// insert into DB
-			String querySQL = "INSERT INTO users VALUES ('amanda.ivey@mail.mcgill.fr', 'password', 1234567890, '475 Ave Des Pins')";
-//			String querySQL = "SELECT * From users"; //INSERT INTO users VALUES ('amanda.ivey@mail.mcgill.ca', 'password', 1234567890, '475 Ave Des Pins')";
-			System.out.println (querySQL) ;
-			java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
-			while ( rs.next ( ) ) {
-				String email = rs.getString ( 1 ) ;
-				int phoneNum = rs.getInt (3);
-				System.out.println ("email:  " + email);
-				System.out.println ("name:  " + phoneNum);
-			}
-			System.out.println ("DONE");
-
-
 		}
 		catch (SQLException e) {
 			System.out.println("Failed Connection");
 			int sqlCode = e.getErrorCode(); // Get SQLCODE
-			String sqlState = e.getSQLState(); // Get SQLSTATE
-
-			// Your code to handle errors comes here;
-			// something more meaningful than a print would be good
+			String sqlState = e.getSQLState(); // Get SQLSTATE 
 			System.out.println("Code: "  + sqlCode + "  sqlState: " + sqlState);
 		}
-
-		// Insert a new tuple
-//	try {
-//	    String querySQL = "INSERT INTO users VALUES ('amanda.ivey@mail.mcgill.ca', 'password', 1234567890, '475 Ave Des Pins')";
-//	    System.out.println (querySQL) ;
-//	    java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
-//	    while ( rs.next ( ) ) {
-//		String email = rs.getString ( 1 ) ;
-//		int phoneNum = rs.getInt (3);
-//		System.out.println ("email:  " + email);
-//		System.out.println ("name:  " + phoneNum);
-//	    }
-//	    System.out.println ("DONE");
-//	} catch (SQLException e)
-//	    {
-////		sqlCode = e.getErrorCode(); // Get SQLCODE
-////		sqlState = e.getSQLState(); // Get SQLSTATE
-////
-////		// Your code to handle errors comes here;
-////		// something more meaningful than a print would be good
-////		System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
-//	    }
-//
-
-	}
+		return con; 
+    }
     
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("");
        
         BorderPane root = new BorderPane();    
-        root.setCenter(clientWindow());
+        root.setCenter(loginWindow());
  
         primaryStage.setScene(new Scene(root, 700, 500));
         primaryStage.show();
@@ -237,7 +202,7 @@ public class databasePortal extends Application {
     }
     
   
-    public GridPane LoginWindow(){
+    public GridPane loginWindow(){
 	
 		GridPane grid = new GridPane();
 		grid.setAlignment(Pos.CENTER);
@@ -264,7 +229,12 @@ public class databasePortal extends Application {
 		loginbtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-            	verifyLogin(email.getText(), pw.getText()); 
+            	boolean success = verifyLogin(email.getText(), pw.getText()); 
+            	if(success == false)
+            	{
+            		 Text error = new Text("Invalid Email or Password!"); 
+            		 grid.add(error,0,4,1,2);
+            	}
             }
         });
 		HBox hbBtn = new HBox(10);
@@ -273,41 +243,41 @@ public class databasePortal extends Application {
 		grid.add(hbBtn, 1, 3);
 		
 		Separator separator = new Separator();
-		grid.add(separator, 0,4,3,1); 
+		grid.add(separator, 0,5,3,1); 
 		
 		Text signup = new Text("  No account?\nSign Up Below");
 		signup.setFont(Font.font ("Verdana", 20));
-		grid.add(signup, 1, 5);
+		grid.add(signup, 1, 6);
 	
 		//name
 		Label name = new Label("Name:");
-		grid.add(name, 0, 6);
+		grid.add(name, 0, 7);
 		TextField nameTextField = new TextField();
-		grid.add(nameTextField, 1, 6);
+		grid.add(nameTextField, 1, 7);
 	
 		//email 
 		Label email2 = new Label("Email :");
-		grid.add(email2, 0, 7);
+		grid.add(email2, 0, 8);
 		TextField emailTextField2 = new TextField();
-		grid.add(emailTextField2, 1, 7);
+		grid.add(emailTextField2, 1, 8);
 		
 		//password
 		Label pw2 = new Label("Password:");
-		grid.add(pw2, 0, 8);
+		grid.add(pw2, 0, 9);
 		PasswordField pwBox2 = new PasswordField();
-		grid.add(pwBox2, 1, 8);
+		grid.add(pwBox2, 1, 9);
 		    
 	    //address
 	    Label address = new Label("Address:");
-		grid.add(address, 0, 9);
+		grid.add(address, 0, 10);
 		TextField addressTextField = new TextField();
-		grid.add(addressTextField, 1, 9);
+		grid.add(addressTextField, 1, 10);
 		
 	    //phone
 		Label phone = new Label("Phone:");
-		grid.add(phone, 0, 10);
+		grid.add(phone, 0, 11);
 		TextField phoneTextField = new TextField();
-		grid.add(phoneTextField, 1, 10);
+		grid.add(phoneTextField, 1, 11);
 	    
 		Button signUpbtn = new Button("Sign up");
 		signUpbtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -324,12 +294,44 @@ public class databasePortal extends Application {
 		return grid; 
     }
     
-    public void verifyLogin(String email, String password)
+    public boolean verifyLogin(String email, String password)
     {
-    	//TODO
-    	//verify that strings are correct 
-    	//add to database 
-    	//on success jump to client window 
+    	//verify that strings are correct v
+    	if(email.length() > 50 || ! email.contains("@"))
+    	{
+    		return false; 
+    	}
+    	
+    	if(password.length() > 20)
+    	{
+    		return false; 
+    	}
+    	
+    	return false; 
+    	
+    	//query database for user 
+//    	String query = "SELECT * FROM users WHERE email ="+email+";";
+//    	Statement stmt = null; 
+//		try {
+//			stmt = con.createStatement();
+//	        ResultSet rs = stmt.executeQuery(query);
+//	        while (rs.next()) {
+//	           String
+//	        	
+//	        	String coffeeName = rs.getString("COF_NAME");
+//	            int supplierID = rs.getInt("SUP_ID");
+//	            float price = rs.getFloat("PRICE");
+//	            int sales = rs.getInt("SALES");
+//	            int total = rs.getInt("TOTAL");
+//	            System.out.println(coffeeName + "\t" + supplierID +
+//	                               "\t" + price + "\t" + sales +
+//	                               "\t" + total);
+//	        }
+//		 } 
+//		 catch (SQLException e ) {} 
+//		 finally{
+//		     if (stmt != null) { stmt.close(); }
+//		 }
     }
     
     
