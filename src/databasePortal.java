@@ -10,6 +10,8 @@ import com.sun.javafx.jmx.MXNodeAlgorithmContext;
 import com.sun.javafx.sg.prism.NGNode;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -52,6 +54,8 @@ import java.sql.SQLException;
 public class databasePortal extends Application {
     static Connection con;
     BorderPane root;
+    HashMap<String, Double> productCart = new HashMap<String, Double>(); 
+    HashMap<String, Double> couponCart = new HashMap<String, Double>(); 
 
 //    String url = "jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421";
 //    String usernamestring = "cs421g26";
@@ -126,7 +130,7 @@ public class databasePortal extends Application {
         primaryStage.setTitle("");
        
         root = new BorderPane();    
-        root.setCenter(clientWindow());
+        root.setCenter(loginWindow());
  
         primaryStage.setScene(new Scene(root, 800, 500));
         primaryStage.show();	
@@ -162,33 +166,108 @@ public class databasePortal extends Application {
     	 rate.setContent(rateContent());
     	 tabPane.getTabs().add(rate); 
          
-    	 //logout
+    	 //logout (just quits) 
     	 Tab logout = new Tab("Logout"); 
     	 tabPane.getTabs().add(logout); 
-    	 logout.setClosable(false);
+    	 logout.setClosable(false); 
+    	 tabPane.getSelectionModel().selectedItemProperty().addListener(
+    			    new ChangeListener<Tab>() {
+    			        @Override
+    			        public void changed(ObservableValue<? extends Tab> ov, Tab t, Tab t1) {
+    			          if(t1.equals(logout)) {
+    			        	  System.exit(0);
+    			          }
+    			        }
+    			    }
+    			);
     	 
-  
          return tabPane; 
     }
     
-    public HBox addProductContent() {
+    public VBox addProductContent() {
+    	VBox vbox = new VBox(); 
+    	//vbox.setAlignment(Pos.TOP_CENTER);
+    	vbox.setSpacing(10);
+   	 	vbox.setPadding(new Insets(70, 30, 30, 20)); 
+    	
     	HBox hbox = new HBox(); 
    	 	hbox.setAlignment(Pos.TOP_CENTER);
    	 	hbox.setSpacing(5);
-   	 	hbox.setPadding(new Insets(30, 20, 10, 20)); 
+   	 	
    	 	TextField textField = new TextField();
    	 	textField.setPromptText("Enter product name...");
    	 
    	 	textField.setPrefWidth(200);
    	 	Button btn = new Button("Search");
+   	 	 
    	 	btn.setOnAction(new EventHandler<ActionEvent>() {
+   	 		HBox searchResults = new HBox();
             @Override
             public void handle(ActionEvent event) {
-                queryCoupons(textField.getText()); 
+            	vbox.getChildren().remove(searchResults); 
+            	// queryCoupons(textField.getText()); 	
+            	displayProducts(textField.getText(), 10.00, searchResults); 
+            	vbox.getChildren().add(searchResults); 
             }
         });
    	 	hbox.getChildren().addAll(textField, btn);
-   	 	return hbox; 
+   	 	vbox.getChildren().add(hbox); 
+   	 	return vbox; 
+    }
+    
+    public void displayProducts(String search, Double price, HBox searchResults){	
+    		
+    	searchResults.setAlignment(Pos.BOTTOM_CENTER);
+    	searchResults.setSpacing(150);
+    	searchResults.setPadding(new Insets(10, 50, 50, 20)); 
+    	
+		if(search.equals("bagel"))
+		{ 
+			Image img = new Image(getClass().getResourceAsStream("./bagel.jpg"));	
+			ImageView iv = new ImageView();
+	        iv.setImage(img); 		
+	        searchResults.getChildren().add(iv); 
+		}
+		else if(search.equals("pumpkin pie"))
+		{
+			Image img = new Image(getClass().getResourceAsStream("./pumpkinPie.png"));	
+			ImageView iv = new ImageView();
+	        iv.setImage(img); 		
+	        searchResults.getChildren().add(iv); 
+		}
+		else if(search.equals("banana"))
+		{
+			Image img = new Image(getClass().getResourceAsStream("./bananas.jpg"));	
+			ImageView iv = new ImageView();
+	        iv.setImage(img); 		
+	        searchResults.getChildren().add(iv); 
+		}
+		else if(search.equals("shrimp"))
+		{
+			Image img = new Image(getClass().getResourceAsStream("./shrimp.jpg"));	
+			ImageView iv = new ImageView();
+	        iv.setImage(img); 		
+	        searchResults.getChildren().add(iv); 
+		}
+		else if(search.equals("popcorn"))
+		{
+			Image img = new Image(getClass().getResourceAsStream("./popcorn.jpg"));	
+			ImageView iv = new ImageView();
+	        iv.setImage(img); 		
+	        searchResults.getChildren().add(iv); 	
+		}
+		
+		Text p = new Text("$" + price.toString()); 
+		
+		Button btn = new Button ("Select"); 
+		btn.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent event) {
+                productCart.put(search, price);  
+            }
+        });
+    	
+		searchResults.getChildren().addAll(p,btn); 
     }
     
     //TODO
@@ -197,7 +276,7 @@ public class databasePortal extends Application {
     	//format output to window
 		HashMap<String, Double> productsAndPrices = new HashMap<String, Double>();
 		try {
-			Connection con = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g26", "Joseph@421");
+			//Connection con = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g26", "Joseph@421");
 			Statement statement = con.createStatement();
 			//System.out.println("Successful Connection");
 			String querySQL = "SELECT * From product WHERE name = '" + name + "';";
@@ -225,6 +304,14 @@ public class databasePortal extends Application {
     public HBox checkOutContent() {
     	HBox h = new HBox(); 
     	return h; 
+    	
+    	// keep a list of products + price 
+    	// coupons + amount saved 
+    	
+    	// display sub total 
+    	//with coupon 
+    	
+    	// pay (use card on file)  >> success 
     }
     
     public HBox couponContent() {
@@ -259,7 +346,6 @@ public class databasePortal extends Application {
 		ArrayList<Integer> promoCodes = null;
 		HashMap<String, Double> productsAndCoupons = new HashMap<String, Double>();
 		try {
-			connect();
 			//Connection con = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g26", "Joseph@421");
 			Statement statement = con.createStatement();
 			//System.out.println("Successful Connection");
@@ -398,7 +484,7 @@ public class databasePortal extends Application {
 		loginbtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-            	boolean success = verifyLogin(email.getText(), pw.getText()); 
+            	boolean success = verifyLogin(emailTextField.getText(), pwBox.getText()); 
             	if(success == false)
             	{
             		 Text error = new Text("Invalid Email or Password!"); 
@@ -447,7 +533,7 @@ public class databasePortal extends Application {
 		signUpbtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-            	boolean success =  verifySignUp(email2.getText(), pw2.getText(), address.getText(), phone.getText()); 
+            	boolean success =  verifySignUp(emailTextField2.getText(), pwBox2.getText(), addressTextField.getText(), phoneTextField.getText()); 
             	if(success == false)
             	{
             		 Text error = new Text("Invalid input, try again!"); 
@@ -463,30 +549,34 @@ public class databasePortal extends Application {
 	
 		return grid; 
     }
-    
-    //TODO (Kathryn) 
+     
     public boolean verifyLogin(String email, String password)
     {
     	//verify that strings are correct values 
-    	if(email.length() > 50 || ! email.contains("@"))
+    	if(email.length() > 50)
     	{
+    		System.out.println("email prob");
     		return false; 
     	} 	
     	if(password.length() > 20)
     	{
+    		System.out.println("psw prob");
     		return false; 
     	}
     	
     	//query database for user 
-    	String query = "SELECT * FROM users WHERE email ="+email+";";
+    	String query = "SELECT * FROM users WHERE email = '"+ email +"';";
+    	System.out.println(query);
     	Statement stmt = null; 
 		try {
 			stmt = con.createStatement();
 	        ResultSet rs = stmt.executeQuery(query);
 	        while (rs.next()) {
 	           String pas = rs.getString("password"); 
+	           System.out.println(pas);
 	           if(password.equals(pas))
 	           {
+	        		System.out.println("succ");
 	        	   root.setCenter(clientWindow());
 	        	   root.setPrefSize(700, 700);
 	           }
