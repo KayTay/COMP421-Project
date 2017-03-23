@@ -33,49 +33,18 @@ import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-
 public class databasePortal extends Application {
     static Connection con;
     BorderPane root;
     HashMap<String, Double> productCart = new HashMap<String, Double>();
     HashMap<String, Double> couponCart = new HashMap<String, Double>();
 
-//    String url = "jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421";
-//    String usernamestring = "cs421g26";
-//    String passwordstring = "Joseph@421";
-	
 	public static void main(String[] args) {
 		//establish database connection
 		con = connect();
 		//launch GUI
 		launch(args);
 	}
-
-//			Testing
-//        try {
-//            Connection con = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g26", "Joseph@421");
-//            Statement statement = con.createStatement();
-//            System.out.println("Successful Connection");
-//            // insert into DB
-//            String productName = "cider";
-//            //String querySQL = "INSERT INTO users VALUES ('amanda.ivey@mail.mcgill.com', 'password', 1234567890, '475 Ave Des Pins')";
-//            String querySQL = "SELECT * From product WHERE name = '" + productName + "';"; //INSERT INTO users VALUES ('amanda.ivey@mail.mcgill.ca', 'password', 1234567890, '475 Ave Des Pins')";
-//            System.out.println (querySQL) ;
-//            java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
-//            while ( rs.next ( ) ) {
-//                String em = rs.getString("name");
-//                //int phoneNum = rs.getInt (3);
-//                System.out.println ("product_name:  " + em);
-//                //System.out.println ("name:  " + phoneNum);
-//            }
-//            System.out.println ("DONE");
-//        }
-//        catch (SQLException e) {
-//            System.out.println("Failed Connection");
-//            int sqlCode = e.getErrorCode(); // Get SQLCODE
-//            String sqlState = e.getSQLState(); // Get SQLSTATE
-//            System.out.println("Code: "  + sqlCode + "  sqlState: " + sqlState);
-//        }
     
     public static Connection connect(){
     	// Register the driver. You must register the driver before you can use it.
@@ -113,7 +82,7 @@ public class databasePortal extends Application {
         primaryStage.setTitle("");
        
         root = new BorderPane();    
-        root.setCenter(loginWindow());
+        root.setCenter(clientWindow());
  
         primaryStage.setScene(new Scene(root, 800, 500));
         primaryStage.show();	
@@ -184,18 +153,19 @@ public class databasePortal extends Application {
    	 	textField.setPrefWidth(200);
    	 	Button btn = new Button("Search");
 
+   	 	HBox searchResults = new HBox();
    	 	btn.setOnAction(new EventHandler<ActionEvent>() {
-   	 		HBox searchResults = new HBox();
+   	 		
             @Override
             public void handle(ActionEvent event) {
-            	vbox.getChildren().remove(searchResults);
-            	// queryCoupons(textField.getText());
-            	displayProducts(textField.getText(), 10.00, searchResults);
-            	vbox.getChildren().add(searchResults);
+            	searchResults.getChildren().clear();
+            	Double price = queryProducts(textField.getText()); 
+            	displayProducts(textField.getText(), price, searchResults);
+            	
             }
         });
    	 	hbox.getChildren().addAll(textField, btn);
-   	 	vbox.getChildren().add(hbox);
+   	 	vbox.getChildren().addAll(hbox, searchResults);
    	 	return vbox;
     }
 
@@ -254,22 +224,21 @@ public class databasePortal extends Application {
 		searchResults.getChildren().addAll(p,btn);
     }
     
-    //TODO
+    
     public double queryProducts(String name) {
-    	//TODO query database for products where name is the product name
-    	//format output to window
+
         Double cheapestPrice = 0.0;
         try {
-            Connection con = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g26", "Joseph@421");
+           
             Statement statement = con.createStatement();
             //System.out.println("Successful Connection");
             String querySQL = "SELECT * From product WHERE name = '" + name + "';";
             //System.out.println (querySQL) ;
             java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
             while ( rs.next ( ) ) {
-                String productName = rs.getString("Product Name");
+                String productName = rs.getString("name");
                 cheapestPrice = rs.getDouble("cheapestprice");
-                System.out.println ("Cheapest Price:  " + cheapestPrice);
+                //System.out.println ("Cheapest Price:  " + cheapestPrice);
             }
             //System.out.println ("DONE");
         }
@@ -279,9 +248,9 @@ public class databasePortal extends Application {
             String sqlState = e.getSQLState(); // Get SQLSTATE
             System.out.println("Code: "  + sqlCode + "  sqlState: " + sqlState);
         }
-        //todo add list of products and prices to GUI, allow user to add to cart
+      
         return cheapestPrice;
-		//todo add list of products and prices to GUI, allow user to add to cart
+		
     }
 
     
@@ -299,7 +268,7 @@ public class databasePortal extends Application {
     	// pay (use card on file)  >> success
     }
     
-    public HBox couponContent() {
+    public VBox couponContent() {
     	HBox hbox = new HBox(); 
    	 	hbox.setAlignment(Pos.TOP_CENTER);
    	 	hbox.setSpacing(5);
@@ -309,35 +278,73 @@ public class databasePortal extends Application {
    	 
    	 	textField.setPrefWidth(200);
    	 	Button btn = new Button("Search");
+   	 	
+   	 	HBox h2 = new HBox(); 
+   	 	h2.setAlignment(Pos.CENTER);
    	 	btn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 String s = textField.getText(); 
             	if(!s.isEmpty())
             	{
-            		queryCoupons(s);
+            		h2.getChildren().clear();
+            		Double savings = queryCoupons(s);
+            		if(savings.equals(0.0))
+            		{
+            			Text t = new Text("No coupons found!"); 
+            			h2.getChildren().add(t); 
+            		}
+            		else
+            		{
+            			displayCoupons(s, savings, h2); 
+            		}
+            		
             	}
             }
         });
    	 	hbox.getChildren().addAll(textField, btn);
-   	 	return hbox; 
+   	 	VBox v = new VBox(); 
+   	 	v.getChildren().addAll(hbox, h2); 
+   	 	return v; 
     }
     
-    //TODO
+    public void displayCoupons(String search, Double savings, HBox h) {
+    	
+    	h.setAlignment(Pos.BOTTOM_CENTER);
+    	h.setSpacing(150);
+    	h.setPadding(new Insets(10, 50, 50, 20));
+	
+		Image img = new Image(getClass().getResourceAsStream("./coupon.png"));
+		ImageView iv = new ImageView();
+        iv.setImage(img);
+		
+		Text p = new Text("$" + savings.toString());
+
+		Button btn = new Button ("Select");
+		btn.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent event) {
+                couponCart.put(search, savings);
+            }
+        });
+
+		h.getChildren().addAll(iv,p,btn);
+    	
+    	
+    }
+    
     public double queryCoupons(String name) {
-    	//TODO query database for coupons where name is the product name
-		//get item ID based on product name
         int itemNum = 0;
         int promocode = 0;
         double amountSaved = 0.0;
         try {
             //connect();
             //Statement statement = con.createStatement();
-            Connection con = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g26", "Joseph@421");
+            //Connection con = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g26", "Joseph@421");
             Statement statement = con.createStatement();
-            System.out.println("Successful Connection");
+           // System.out.println("Successful Connection");
             String queryProducts = "SELECT itemid From product WHERE name = '" + name + "';";
-            System.out.println(queryProducts);
+           // System.out.println(queryProducts);
             java.sql.ResultSet rs_products = statement.executeQuery (queryProducts);
             while (rs_products.next()) {
                 //String productName = rs_products.getString("name");
@@ -345,21 +352,21 @@ public class databasePortal extends Application {
                 System.out.println(itemNum);
             }
             String queryAssociatedWith = "SELECT * FROM \"associatedWith\" WHERE itemid = " + itemNum + ";";
-            System.out.println(queryAssociatedWith);
+            //System.out.println(queryAssociatedWith);
             java.sql.ResultSet rs_promoCodes = statement.executeQuery(queryAssociatedWith);
             while ( rs_promoCodes.next() )  {
                 promocode = rs_promoCodes.getInt("promocode");
-                System.out.println(promocode);
+               // System.out.println(promocode);
             }
             String queryCoupons = "SELECT * FROM coupon WHERE promocode = " + promocode + ";";
-            System.out.println(queryCoupons);
+           // System.out.println(queryCoupons);
             java.sql.ResultSet rs_coupons = statement.executeQuery(queryCoupons);
             while ( rs_coupons.next () ) {
                 amountSaved = rs_coupons.getDouble("amountsaved");
-                System.out.println(amountSaved);
+                //System.out.println(amountSaved);
             }
 
-            System.out.println ("DONE");
+           // System.out.println ("DONE");
         }
         catch (SQLException e) {
             System.out.println("Failed Connection");
@@ -371,7 +378,6 @@ public class databasePortal extends Application {
         return amountSaved;
 
     	//format output to window
-
     }
   
     public VBox rateContent() {    
@@ -433,7 +439,17 @@ public class databasePortal extends Application {
             	
             	if(selected > 0 && !s.isEmpty())
             	{
-            		insertRating(s, selected); 
+            		boolean success = insertRating(s, selected); 
+            		if(success) {
+            			Text t = new Text("Success! Thank you for you input"); 
+            			v.getChildren().addAll(t); 
+            			textField.clear();
+            			for( Node n : nodes)
+                    	{
+                    		((ToggleButton)n).setGraphic(new ImageView(emptystar));
+                    	}
+            		}
+            		
             	}
             }
         });
@@ -443,18 +459,17 @@ public class databasePortal extends Application {
     	 return v; 
     }
    
-    //TODO
-    public void insertRating(String name, int rating)
+    public boolean insertRating(String name, int rating)
     {
     	//given the delivery man's name update their rating
         try {
-            Connection con = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g26", "Joseph@421");
             Statement statement = con.createStatement();
-            System.out.println("Successful Connection");
+            //System.out.println("Successful Connection");
             String querySQL = "UPDATE \"deliveryMan\" SET rating = "+ rating +" WHERE name = '" + name + "';";
-            System.out.println (querySQL) ;
+            //System.out.println (querySQL) ;
             statement.executeUpdate (querySQL) ;
-            System.out.println ("Successful insert");
+            //System.out.println ("Successful insert");
+            return true; 
         }
         catch (SQLException e) {
             System.out.println("Failed Connection");
@@ -462,6 +477,7 @@ public class databasePortal extends Application {
             String sqlState = e.getSQLState(); // Get SQLSTATE
             System.out.println("Code: "  + sqlCode + "  sqlState: " + sqlState);
         }
+        return false; 
     }
     
     public GridPane loginWindow(){
@@ -595,10 +611,8 @@ public class databasePortal extends Application {
 		return true; 
     }
     
-    //TODO (Amanda) 
     public boolean verifySignUp(String email, String password, String address, String phone)
     {
-    	//TODO
         if ((email.length() < 50 && email.length() > 0) && (password.length()<20 && password.length() > 0) && (address.length()< 50 && address.length() > 0) && (Integer.parseInt(phone) != 0 && phone.length() > 0)) {
 			String query = "INSERT INTO users VALUES('" + email + "' , '" + password + "', " + Integer.parseInt(phone) + ", '" + address + "');";
 			System.out.println(query);
