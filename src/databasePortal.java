@@ -620,11 +620,17 @@ public class databasePortal extends Application {
     {
     	//TODO
         if ((email.length()< 50) && (password.length()<20) && (address.length()< 50) && (Integer.parseInt(phone) != 0)) {
-            return true;
+			String query = "INSERT INTO users VALUES('" + email + "' , '" + password + "', " + Integer.parseInt(phone) + ", '" + address + "');";
+			System.out.println(query);
+			root.setCenter(clientWindow());
+			root.setPrefSize(700,700);
+        	return true;
         }
         else {
             return false;
         }
+
+
     }
 }
 	
