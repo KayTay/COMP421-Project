@@ -1,14 +1,4 @@
-import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import javax.imageio.ImageIO;
-
-import com.sun.javafx.geom.BaseBounds;
-import com.sun.javafx.geom.transform.BaseTransform;
-import com.sun.javafx.jmx.MXNodeAlgorithm;
-import com.sun.javafx.jmx.MXNodeAlgorithmContext;
-import com.sun.javafx.sg.prism.NGNode;
-
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -18,13 +8,10 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
@@ -36,15 +23,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-
 import java.sql.* ;
 import java.sql.DriverManager;
 import java.sql.Connection;
@@ -590,7 +573,6 @@ public class databasePortal extends Application {
     	
     	//query database for user 
     	String query = "SELECT * FROM users WHERE email = '"+ email +"';";
-    	System.out.println(query);
     	Statement stmt = null; 
 		try {
 			stmt = con.createStatement();
@@ -600,7 +582,6 @@ public class databasePortal extends Application {
 	           System.out.println(pas);
 	           if(password.equals(pas))
 	           {
-	        		System.out.println("succ");
 	        	   root.setCenter(clientWindow());
 	        	   root.setPrefSize(700, 700);
 	           }
@@ -622,9 +603,7 @@ public class databasePortal extends Application {
         if ((email.length()< 50) && (password.length()<20) && (address.length()< 50) && (Integer.parseInt(phone) != 0)) {
             return true;
         }
-        else {
-            return false;
-        }
+        return true; 
     }
 }
 	
