@@ -560,12 +560,12 @@ public class databasePortal extends Application {
     public boolean verifyLogin(String email, String password)
     {
     	//verify that strings are correct values 
-    	if(email.length() > 50)
+    	if(email.length() > 50 || email.length() <= 0)
     	{
     		System.out.println("email prob");
     		return false;
     	} 	
-    	if(password.length() > 20)
+    	if(password.length() > 20 || password.length() <= 0)
     	{
     		System.out.println("psw prob");
     		return false;
@@ -583,7 +583,6 @@ public class databasePortal extends Application {
 	           if(password.equals(pas))
 	           {
 	        	   root.setCenter(clientWindow());
-	        	   root.setPrefSize(700, 700);
 	           }
 	        }
 		} 
@@ -600,10 +599,15 @@ public class databasePortal extends Application {
     public boolean verifySignUp(String email, String password, String address, String phone)
     {
     	//TODO
-        if ((email.length()< 50) && (password.length()<20) && (address.length()< 50) && (Integer.parseInt(phone) != 0)) {
-            return true;
+        if ((email.length() < 50 && email.length() > 0) && (password.length()<20 && password.length() > 0) && (address.length()< 50 && address.length() > 0) && (Integer.parseInt(phone) != 0 && phone.length() > 0)) {
+			String query = "INSERT INTO users VALUES('" + email + "' , '" + password + "', " + Integer.parseInt(phone) + ", '" + address + "');";
+			System.out.println(query);
+			root.setCenter(clientWindow());
+        	return true;
         }
-        return true; 
+        else {
+            return false;
+        }
     }
 }
 	
